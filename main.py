@@ -21,12 +21,12 @@ tweets_fields = utils.change_dtypes(tweets_fields, {'status_id': str})
 labels = utils.change_dtypes(labels, {'status_id': str})
 tweets_labeled = tweets_fields.merge(labels, on = 'status_id', how = 'inner')
 #tweets_labeled = tweets_labeled[[]]
-texto_prueba = tweets_labeled.loc[:, ['text', 'categoria']].fillna('MACHISTA')
-#texto_prueba = tweets_labeled.loc[1240:1250, ['text', 'categoria']].fillna('MACHISTA')
+#texto_prueba = tweets_labeled.loc[:, ['text', 'categoria']].fillna('MACHISTA')
+texto_prueba = tweets_labeled.loc[1240:1250, ['text', 'categoria']].fillna('MACHISTA')
 #texto_prueba['text'].str.decode("utf-8")
 
-texto_prueba['text_processed'] = texto_prueba['text'].apply(
-        lambda row: utils.remove_punctuation(utils.remove_accents(row.decode('utf-8'))))
+#texto_prueba['text_processed'] = texto_prueba['text'].apply(
+#        lambda row: utils.remove_punctuation(utils.remove_accents(row.decode('utf-8'))))
 
 #%%
 
@@ -64,6 +64,7 @@ random_pipeline.fit(res.drop('categoria', axis = 1),res['categoria'])
 cross_val_score(random_pipeline, res.drop('categoria', axis = 1), res['categoria'], cv = 5)
 
 #%% Add tfidf features
+#https://stackoverflow.com/questions/45961747/append-tfidf-to-pandas-dataframe
 
 from src.preprocess import TextCleaner
 
@@ -71,26 +72,69 @@ preprocessor = TextCleaner(filter_users=True, filter_hashtags=True,
                            filter_urls=True, convert_hastags=True, lowercase=True, 
                            replace_exclamation=True, replace_interrogation=True, 
                            remove_accents=True, remove_punctuation=True, replace_emojis=True)
+
 v = TfidfVectorizer(tokenizer=utils.tokenizer_, 
                                           smooth_idf=True, preprocessor = preprocessor,
                                           norm=None)
 
-x = v.fit_transform(texto_prueba['text_processed'])
+x = v.fit_transform(texto_prueba['text'])
 
 df1 = pd.DataFrame(x.toarray(), columns=v.get_feature_names())
-#df.drop('text', axis=1, inplace=True)
-res = pd.concat([texto_prueba, df1], axis=1).fillna('MACHISTA')
+#texto_prueba.drop('text', axis=1, inplace=True)
+res = pd.concat([texto_prueba, df1], axis=1)
 
 
 random_pipeline = Pipeline([
 
-                ('clf', clf.get_classifier('random_forest'))
+                ('clf', clf.get_classifier())
             ])
 
 random_pipeline.fit(res.drop('categoria', axis = 1),res['categoria'])
 
 cross_val_score(random_pipeline, res.drop('categoria', axis = 1), res['categoria'], cv = 5)
 
+#%%
+
+from src.preprocess import TextCleaner
+
+preprocessor = TextCleaner(filter_users=True, filter_hashtags=True, 
+                           filter_urls=True, convert_hastags=True, lowercase=True, 
+                           replace_exclamation=True, replace_interrogation=True, 
+                           remove_accents=True, remove_punctuation=True, replace_emojis=True)
+
+
+
+tfidf_vec = TfidfVectorizer(tokenizer=utils.tokenizer_, 
+                                          smooth_idf=True, preprocessor = preprocessor,
+                                          norm=None)
+tfidf_dense = tfidf_vec.fit_transform(texto_prueba['text']).todense()
+new_cols = tfidf_vec.get_feature_names()
+
+df = pd.DataFrame(tfidf_dense, columns=new_cols)
+df['text'] = texto_prueba['text'].values
+#df = texto_prueba.join(pd.DataFrame(tfidf_dense, columns=new_cols))
+
+
+#%%
+
+from src.preprocess import TextCleaner
+
+preprocessor = TextCleaner(filter_users=True, filter_hashtags=True, 
+                           filter_urls=True, convert_hastags=True, lowercase=True, 
+                           replace_exclamation=True, replace_interrogation=True, 
+                           remove_accents=True, remove_punctuation=True, replace_emojis=True)
+						   
+preprocessor('pruebá @JUAN #MeEstoyCansandoTelá!? #perotela http://www.as.com 😀😀')
+#%%
+
+from src.preprocess import TextCleaner
+
+preprocessor = TextCleaner(filter_users=False, filter_hashtags=False, 
+                           filter_urls=False, convert_hastags=False, lowercase=False, 
+                           replace_exclamation=False, replace_interrogation=False, 
+                           remove_accents=False, remove_punctuation=False, replace_emojis=True)
+						   
+preprocessor('😀😀')
 #%% Campos
 
 # Campos: status_id, screen_name?, text, source, display_text_width, reply_to_status_id != null?

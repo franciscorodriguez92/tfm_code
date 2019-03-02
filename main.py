@@ -5,9 +5,10 @@ import os
 import src.preprocess_utils as utils
 import src.classifier as clf
 
-from sklearn.pipeline import Pipeline
+from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import cross_val_score
+from sklearn.preprocessing import FunctionTransformer
 
 #%% Read files
 path = os.getcwd()
@@ -22,7 +23,7 @@ labels = utils.change_dtypes(labels, {'status_id': str})
 tweets_labeled = tweets_fields.merge(labels, on = 'status_id', how = 'inner')
 #tweets_labeled = tweets_labeled[[]]
 #texto_prueba = tweets_labeled.loc[:, ['text', 'categoria']].fillna('MACHISTA')
-texto_prueba = tweets_labeled.loc[1240:1250, ['text', 'categoria']].fillna('MACHISTA')
+texto_prueba = tweets_labeled.loc[1240:1250, ['text', 'display_text_width', 'categoria']].fillna('DUDOSO')
 #texto_prueba['text'].str.decode("utf-8")
 
 #texto_prueba['text_processed'] = texto_prueba['text'].apply(
@@ -37,34 +38,21 @@ LogReg_pipeline = Pipeline([
                 ('clf', clf.get_classifier()),
             ])
 
-LogReg_pipeline.fit(texto_prueba['text_processed'],texto_prueba['categoria'])
+LogReg_pipeline.fit(texto_prueba['text'],texto_prueba['categoria'])
 
 #clf.cross_validation(LogReg_pipeline, texto_prueba['text_processed'], texto_prueba['categoria'], cv = 5)
 
-cross_val_score(LogReg_pipeline, texto_prueba['text_processed'], texto_prueba['categoria'], cv = 5)
+cross_val_score(LogReg_pipeline, texto_prueba['text'], texto_prueba['categoria'], cv = 5)
 
-#%% Add tfidf features
-v = TfidfVectorizer(tokenizer=utils.tokenizer_, 
-                                          smooth_idf=True, preprocessor = None,
-                                          norm=None)
-x = v.fit_transform(texto_prueba['text_processed'])
+#%%
+#https://stackoverflow.com/questions/47890844/sklearn-feature-union-with-a-dictionary-and-text-data
+#texto_prueba['prueba'] = range(1,12)
 
-df1 = pd.DataFrame(x.toarray(), columns=v.get_feature_names())
-#df.drop('text', axis=1, inplace=True)
-res = pd.concat([texto_prueba, df1], axis=1).fillna('MACHISTA')
+def select_text_data(X):
+    return X['text']
 
-
-random_pipeline = Pipeline([
-
-                ('clf', clf.get_classifier('random_forest'))
-            ])
-
-random_pipeline.fit(res.drop('categoria', axis = 1),res['categoria'])
-
-cross_val_score(random_pipeline, res.drop('categoria', axis = 1), res['categoria'], cv = 5)
-
-#%% Add tfidf features
-#https://stackoverflow.com/questions/45961747/append-tfidf-to-pandas-dataframe
+def select_remaining_data(X):
+    return X.drop('text', axis=1)
 
 from src.preprocess import TextCleaner
 
@@ -73,25 +61,32 @@ preprocessor = TextCleaner(filter_users=True, filter_hashtags=True,
                            replace_exclamation=True, replace_interrogation=True, 
                            remove_accents=True, remove_punctuation=True, replace_emojis=True)
 
-v = TfidfVectorizer(tokenizer=utils.tokenizer_, 
+# pipeline to get all tfidf and word count for first column
+text_pipeline = Pipeline([
+    ('column_selection', FunctionTransformer(select_text_data, validate=False)),
+    ('tfidf', TfidfVectorizer(tokenizer=utils.tokenizer_, 
                                           smooth_idf=True, preprocessor = preprocessor,
-                                          norm=None)
+                                          norm=None))
+])
+    
+B = text_pipeline.fit(texto_prueba[['text','display_text_width']])
+B = text_pipeline.fit_transform(texto_prueba[['text','display_text_width']])
 
-x = v.fit_transform(texto_prueba['text'])
+B = B.todense()
 
-df1 = pd.DataFrame(x.toarray(), columns=v.get_feature_names())
-#texto_prueba.drop('text', axis=1, inplace=True)
-res = pd.concat([texto_prueba, df1], axis=1)
+random_pipeline = Pipeline([('feature-union', FeatureUnion([('text-features', text_pipeline), 
+                               ('other-features', FunctionTransformer(select_remaining_data, validate = False))
+                              ])),
+                          ('clf', clf.get_classifier())
+                          ])
+    
+select_pipeline = Pipeline([('other-features', FunctionTransformer(select_remaining_data, validate = False))])
 
+    
+random_pipeline.fit(texto_prueba[['text','display_text_width']], texto_prueba['categoria'])
 
-random_pipeline = Pipeline([
+cross_val_score(random_pipeline, texto_prueba.drop('categoria', axis = 1), texto_prueba['categoria'], cv = 5)
 
-                ('clf', clf.get_classifier())
-            ])
-
-random_pipeline.fit(res.drop('categoria', axis = 1),res['categoria'])
-
-cross_val_score(random_pipeline, res.drop('categoria', axis = 1), res['categoria'], cv = 5)
 
 #%%
 
@@ -115,26 +110,7 @@ df['text'] = texto_prueba['text'].values
 #df = texto_prueba.join(pd.DataFrame(tfidf_dense, columns=new_cols))
 
 
-#%%
 
-from src.preprocess import TextCleaner
-
-preprocessor = TextCleaner(filter_users=True, filter_hashtags=True, 
-                           filter_urls=True, convert_hastags=True, lowercase=True, 
-                           replace_exclamation=True, replace_interrogation=True, 
-                           remove_accents=True, remove_punctuation=True, replace_emojis=True)
-						   
-preprocessor('pruebá @JUAN #MeEstoyCansandoTelá!? #perotela http://www.as.com 😀😀')
-#%%
-
-from src.preprocess import TextCleaner
-
-preprocessor = TextCleaner(filter_users=False, filter_hashtags=False, 
-                           filter_urls=False, convert_hastags=False, lowercase=False, 
-                           replace_exclamation=False, replace_interrogation=False, 
-                           remove_accents=False, remove_punctuation=False, replace_emojis=True)
-						   
-preprocessor('😀😀')
 #%% Campos
 
 # Campos: status_id, screen_name?, text, source, display_text_width, reply_to_status_id != null?

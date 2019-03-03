@@ -30,21 +30,6 @@ texto_prueba = tweets_labeled.loc[1240:1250, ['text', 'display_text_width', 'cat
 #        lambda row: utils.remove_punctuation(utils.remove_accents(row.decode('utf-8'))))
 
 #%%
-
-LogReg_pipeline = Pipeline([
-                ('tfidf', TfidfVectorizer(tokenizer=utils.tokenizer_, 
-                                          smooth_idf=True, preprocessor = None,
-                                          norm=None)),
-                ('clf', clf.get_classifier()),
-            ])
-
-LogReg_pipeline.fit(texto_prueba['text'],texto_prueba['categoria'])
-
-#clf.cross_validation(LogReg_pipeline, texto_prueba['text_processed'], texto_prueba['categoria'], cv = 5)
-
-cross_val_score(LogReg_pipeline, texto_prueba['text'], texto_prueba['categoria'], cv = 5)
-
-#%%
 #https://stackoverflow.com/questions/47890844/sklearn-feature-union-with-a-dictionary-and-text-data
 #texto_prueba['prueba'] = range(1,12)
 

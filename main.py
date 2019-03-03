@@ -9,7 +9,6 @@ import numpy as np
 from sklearn.pipeline import Pipeline, FeatureUnion, make_pipeline
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import cross_val_score
-from sklearn.preprocessing import FunctionTransformer
 from src.preprocess import TextCleaner
 from src.preprocess import ColumnSelector
 from src.preprocess import TypeSelector

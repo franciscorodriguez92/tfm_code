@@ -13,7 +13,8 @@ from sklearn.preprocessing import FunctionTransformer
 from src.preprocess import TextCleaner
 from src.preprocess import ColumnSelector
 from src.preprocess import TypeSelector
-from sklearn.preprocessing import OneHotEncoder, Imputer, StandardScaler
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.impute import SimpleImputer
 
 #%% Read files
 path = os.getcwd()
@@ -134,7 +135,7 @@ preprocess_pipeline = make_pipeline(
     FeatureUnion(transformer_list=[
         ("numeric_features", make_pipeline(
             TypeSelector(np.number),
-            Imputer(strategy="median"),
+            SimpleImputer(strategy="median"),
             StandardScaler()
         )),
         ("categorical_features", make_pipeline(

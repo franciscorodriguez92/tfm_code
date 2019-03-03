@@ -9,6 +9,9 @@ from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import cross_val_score
 from sklearn.preprocessing import FunctionTransformer
+from src.preprocess import TextCleaner
+from src.preprocess import ColumnSelector
+from src.preprocess import TypeSelector
 
 #%% Read files
 path = os.getcwd()
@@ -30,16 +33,13 @@ texto_prueba = tweets_labeled.loc[1240:1250, ['text', 'display_text_width', 'cat
 #        lambda row: utils.remove_punctuation(utils.remove_accents(row.decode('utf-8'))))
 
 #%%
-#https://stackoverflow.com/questions/47890844/sklearn-feature-union-with-a-dictionary-and-text-data
-#texto_prueba['prueba'] = range(1,12)
-
+#https://ramhiser.com/post/2018-04-16-building-scikit-learn-pipeline-with-pandas-dataframe/
 def select_text_data(X):
     return X['text']
 
 def select_remaining_data(X):
     return X.drop('text', axis=1)
 
-from src.preprocess import TextCleaner
 
 preprocessor = TextCleaner(filter_users=True, filter_hashtags=True, 
                            filter_urls=True, convert_hastags=True, lowercase=True, 
@@ -74,8 +74,6 @@ cross_val_score(random_pipeline, texto_prueba.drop('categoria', axis = 1), texto
 
 
 #%%
-
-from src.preprocess import TextCleaner
 
 preprocessor = TextCleaner(filter_users=True, filter_hashtags=True, 
                            filter_urls=True, convert_hastags=True, lowercase=True, 

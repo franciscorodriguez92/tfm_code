@@ -44,68 +44,6 @@ categorical_features = ['source', 'respuesta', 'respuesta_screen_name',
 for f in categorical_features:
     texto_prueba[f] = texto_prueba[f].astype("category")
 
-#%%
-#https://ramhiser.com/post/2018-04-16-building-scikit-learn-pipeline-with-pandas-dataframe/
-def select_text_data(X):
-    return X['text']
-
-def select_remaining_data(X):
-    return X.drop('text', axis=1)
-
-
-preprocessor = TextCleaner(filter_users=True, filter_hashtags=True, 
-                           filter_urls=True, convert_hastags=True, lowercase=True, 
-                           replace_exclamation=True, replace_interrogation=True, 
-                           remove_accents=True, remove_punctuation=True, replace_emojis=True)
-
-# pipeline to get all tfidf and word count for first column
-text_pipeline = Pipeline([
-    ('column_selection', FunctionTransformer(select_text_data, validate=False)),
-    ('tfidf', TfidfVectorizer(tokenizer=utils.tokenizer_, 
-                                          smooth_idf=True, preprocessor = preprocessor,
-                                          norm=None))
-])
-    
-B = text_pipeline.fit(texto_prueba[['text','display_text_width']])
-B = text_pipeline.fit_transform(texto_prueba[['text','display_text_width']])
-
-B = B.todense()
-
-random_pipeline = Pipeline([('feature-union', FeatureUnion([('text-features', text_pipeline), 
-                               ('other-features', FunctionTransformer(select_remaining_data, validate = False))
-                              ])),
-                          ('clf', clf.get_classifier())
-                          ])
-    
-select_pipeline = Pipeline([('other-features', FunctionTransformer(select_remaining_data, validate = False))])
-
-    
-random_pipeline.fit(texto_prueba[['text','display_text_width']], texto_prueba['categoria'])
-
-cross_val_score(random_pipeline, texto_prueba.drop('categoria', axis = 1), texto_prueba['categoria'], cv = 5)
-
-
-#%%
-
-preprocessor = TextCleaner(filter_users=True, filter_hashtags=True, 
-                           filter_urls=True, convert_hastags=True, lowercase=True, 
-                           replace_exclamation=True, replace_interrogation=True, 
-                           remove_accents=True, remove_punctuation=True, replace_emojis=True)
-
-
-
-tfidf_vec = TfidfVectorizer(tokenizer=utils.tokenizer_, 
-                                          smooth_idf=True, preprocessor = preprocessor,
-                                          norm=None)
-tfidf_dense = tfidf_vec.fit_transform(texto_prueba['text']).todense()
-new_cols = tfidf_vec.get_feature_names()
-
-df = pd.DataFrame(tfidf_dense, columns=new_cols)
-df['text'] = texto_prueba['text'].values
-#df = texto_prueba.join(pd.DataFrame(tfidf_dense, columns=new_cols))
-
-
-
 #%% Campos
 
 # Campos:  text, source, display_text_width, reply_to_status_id != null?

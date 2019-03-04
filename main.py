@@ -39,7 +39,7 @@ tweets_labeled['mentions_presence'] = np.where(tweets_labeled['mentions_user_id'
 
 #tweets_labeled = tweets_labeled[[]]
 #texto_prueba = tweets_labeled.loc[:, ['text', 'categoria']].fillna('MACHISTA')
-texto_prueba = tweets_labeled.loc[1240:1250, x_cols2]
+#texto_prueba = tweets_labeled.loc[1240:1250, x_cols2]
 #texto_prueba['text'].str.decode("utf-8")
 
 #texto_prueba['text_processed'] = texto_prueba['text'].apply(
@@ -49,7 +49,7 @@ categorical_features = ['source', 'respuesta', 'respuesta_screen_name',
           'is_quote', 'is_retweet', 'hastag_presence', 'url_presence',
           'media_type', 'mentions_presence', 'protected', 'verified']
 for f in categorical_features:
-    texto_prueba[f] = texto_prueba[f].astype("category")
+    tweets_labeled[f] = tweets_labeled[f].astype("category")
 
 #%% Campos
 
@@ -115,12 +115,12 @@ classifier_pipeline = Pipeline([('feature-union', FeatureUnion([('text-features'
                           ('clf', clf.get_classifier())
                           ])
     
-classifier_pipeline.fit(texto_prueba.drop('categoria', axis=1), texto_prueba['categoria'])
+classifier_pipeline.fit(tweets_labeled[x_cols2], tweets_labeled['categoria'])
 
 #predicted = classifier_pipeline.predict(texto_prueba.drop('categoria', axis=1))
 #print np.mean(predicted == texto_prueba['categoria']) 
 
-cross_val_score(classifier_pipeline, texto_prueba.drop('categoria', axis = 1), texto_prueba['categoria'], cv = 3)
+cross_val_score(classifier_pipeline, tweets_labeled[x_cols2], tweets_labeled['categoria'], cv = 10)
 
 
 

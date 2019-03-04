@@ -22,24 +22,32 @@ labels = labels[["status_id","categoria"]]
 tweets_fields = pd.read_csv(path + '/resources/data/corpus_machismo_frodriguez_atributos_extra.csv', 
                             dtype={'status_id': 'str'})
 #%% Cruce de los ficheros
-
+x_cols2 = ['text','source', 'display_text_width', 'respuesta', 'respuesta_screen_name',
+          'is_quote', 'is_retweet', 'favorite_count', 'retweet_count', 'hastag_presence',
+          'url_presence', 'media_type', 'mentions_presence', 'retweet_favorite_count',
+          'retweet_retweet_count', 'retweet_followers_count', 'retweet_verified',
+          'protected', 'followers_count', 'friends_count', 'listed_count', 'statuses_count',
+          'favourites_count', 'verified', 'categoria']
 tweets_fields = utils.change_dtypes(tweets_fields, {'status_id': str})
 labels = utils.change_dtypes(labels, {'status_id': str})
 tweets_labeled = tweets_fields.merge(labels, on = 'status_id', how = 'inner')
 tweets_labeled['respuesta'] = np.where(tweets_labeled['reply_to_status_id'].isnull(), 'no', 'si')
 tweets_labeled['respuesta_screen_name'] = np.where(tweets_labeled['reply_to_screen_name'].isnull(), 'no', 'si') 
+tweets_labeled['hastag_presence'] = np.where(tweets_labeled['hashtags'].isnull(), 'no', 'si') 
+tweets_labeled['url_presence'] = np.where(tweets_labeled['urls_url'].isnull(), 'no', 'si') 
+tweets_labeled['mentions_presence'] = np.where(tweets_labeled['mentions_user_id'].isnull(), 'no', 'si') 
 
 #tweets_labeled = tweets_labeled[[]]
 #texto_prueba = tweets_labeled.loc[:, ['text', 'categoria']].fillna('MACHISTA')
-texto_prueba = tweets_labeled.loc[1240:1250, ['text', 'display_text_width', 'categoria','source', 'display_text_width', 'respuesta', 'respuesta_screen_name',
-          'is_quote', 'is_retweet', 'favorite_count', 'retweet_count']].fillna('DUDOSO')
+texto_prueba = tweets_labeled.loc[1240:1250, x_cols2]
 #texto_prueba['text'].str.decode("utf-8")
 
 #texto_prueba['text_processed'] = texto_prueba['text'].apply(
 #        lambda row: utils.remove_punctuation(utils.remove_accents(row.decode('utf-8'))))
 #%% 
 categorical_features = ['source', 'respuesta', 'respuesta_screen_name',
-          'is_quote', 'is_retweet']
+          'is_quote', 'is_retweet', 'hastag_presence', 'url_presence',
+          'media_type', 'mentions_presence', 'protected', 'verified']
 for f in categorical_features:
     texto_prueba[f] = texto_prueba[f].astype("category")
 
@@ -49,9 +57,12 @@ for f in categorical_features:
 # reply_to_screen_name != 0, is_quote (es citado), is_retweet, favorite_count, retweet_count,
 
 #campos que faltan por poner:::::::::
-# hastags != 0, urls_url !=0, media_type, mentions_user_id != 0, mentions_screen_name != 0,
-# quoted_source, quoted_favorite_count, quoted_retweet_count, quoted_followers_count, quoted_friends_count
-#quoted_statuses_count, retweet_source, retweet_favorite_count, retweet_retweet_count
+# hastags != 0, 
+#urls_url !=0, media_type,
+# mentions_user_id != 0,
+# , quoted_favorite_count, quoted_retweet_count, quoted_followers_count, quoted_friends_count
+#quoted_statuses_count, retweet_source, 
+#retweet_favorite_count, retweet_retweet_count
 # retweet_followers_count, retweet_friends_count,retweet_statuses_count, retweet_verified
 #protected
 #followers_count
@@ -59,25 +70,28 @@ for f in categorical_features:
 #listed_count
 #statuses_count
 #favourites_count
-#account_created_at
 #verified
 
 
 #%% 
-text = ['text']
 x_cols = ['source', 'display_text_width', 'respuesta', 'respuesta_screen_name',
-          'is_quote', 'is_retweet', 'favorite_count', 'retweet_count']
+          'is_quote', 'is_retweet', 'favorite_count', 'retweet_count', 'hastag_presence',
+          'url_presence', 'media_type', 'mentions_presence', 'retweet_favorite_count',
+          'retweet_retweet_count', 'retweet_followers_count', 'retweet_verified',
+          'protected', 'followers_count', 'friends_count', 'listed_count', 'statuses_count',
+          'favourites_count', 'verified']
+
 preprocess_pipeline = make_pipeline(
     ColumnSelector(columns=x_cols),
     FeatureUnion(transformer_list=[
         ("numeric_features", make_pipeline(
             TypeSelector(np.number),
-            SimpleImputer(strategy="median"),
+            SimpleImputer(strategy="constant"),
             StandardScaler()
         )),
         ("categorical_features", make_pipeline(
             TypeSelector("category"),
-            #Imputer(strategy="most_frequent"),
+            SimpleImputer(strategy="constant", fill_value = "NA"),
             OneHotEncoder(handle_unknown='ignore')
         ))
     ])

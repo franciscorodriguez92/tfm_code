@@ -8,7 +8,7 @@ import numpy as np
 
 from sklearn.pipeline import Pipeline, FeatureUnion, make_pipeline
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_val_score, GridSearchCV
 from src.preprocess import TextCleaner
 from src.preprocess import ColumnSelector
 from src.preprocess import TypeSelector
@@ -37,7 +37,8 @@ tweets_labeled['hastag_presence'] = np.where(tweets_labeled['hashtags'].isnull()
 tweets_labeled['url_presence'] = np.where(tweets_labeled['urls_url'].isnull(), 'no', 'si') 
 tweets_labeled['mentions_presence'] = np.where(tweets_labeled['mentions_user_id'].isnull(), 'no', 'si') 
 
-#tweets_labeled = tweets_labeled[[]]
+#tweets_labeled = tweets_labeled.loc[1:20,:]
+
 #texto_prueba = tweets_labeled.loc[:, ['text', 'categoria']].fillna('MACHISTA')
 #texto_prueba = tweets_labeled.loc[1240:1250, x_cols2]
 #texto_prueba['text'].str.decode("utf-8")
@@ -117,13 +118,27 @@ classifier_pipeline = Pipeline([('feature-union', FeatureUnion([('text-features'
     
 classifier_pipeline.fit(tweets_labeled[x_cols2], tweets_labeled['categoria'])
 
+
+#%%
+cross_val_score(classifier_pipeline, tweets_labeled[x_cols2], tweets_labeled['categoria'], cv = 10)
 #predicted = classifier_pipeline.predict(texto_prueba.drop('categoria', axis=1))
 #print np.mean(predicted == texto_prueba['categoria']) 
 
-cross_val_score(classifier_pipeline, tweets_labeled[x_cols2], tweets_labeled['categoria'], cv = 10)
 
+#%%
 
+# para chequear los parámetros:: classifier_pipeline.get_params().keys()
+parameters = utils.get_grid_parameters()
 
+model = GridSearchCV(classifier_pipeline, param_grid=parameters, cv=5,
+                         scoring='accuracy', verbose=1, n_jobs = -1)
+
+model.fit(tweets_labeled[x_cols2], tweets_labeled['categoria'])
+print("Best score: %0.3f" % model.best_score_)
+print("Best parameters set:")
+best_parameters = model.best_estimator_.get_params()
+for param_name in sorted(parameters.keys()):
+    print("\t%s: %r" % (param_name, best_parameters[param_name]))
 
 
 

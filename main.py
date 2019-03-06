@@ -120,14 +120,23 @@ classifier_pipeline.fit(tweets_labeled[x_cols2], tweets_labeled['categoria'])
 
 
 #%%
-cross_val_score(classifier_pipeline, tweets_labeled[x_cols2], tweets_labeled['categoria'], cv = 10)
+#import time
+#start = time.time()
+
+#print(cross_val_score(classifier_pipeline, tweets_labeled[x_cols2], tweets_labeled['categoria'], cv = 10, n_jobs = -1))
 #predicted = classifier_pipeline.predict(texto_prueba.drop('categoria', axis=1))
 #print np.mean(predicted == texto_prueba['categoria']) 
 
+#end = time.time()
+#print(end - start)
 
 #%%
 
 # para chequear los parámetros:: classifier_pipeline.get_params().keys()
+
+
+import time
+start = time.time()
 parameters = utils.get_grid_parameters()
 
 model = GridSearchCV(classifier_pipeline, param_grid=parameters, cv=5,
@@ -140,6 +149,7 @@ best_parameters = model.best_estimator_.get_params()
 for param_name in sorted(parameters.keys()):
     print("\t%s: %r" % (param_name, best_parameters[param_name]))
 
-
+end = time.time()
+print(end - start)
 
 

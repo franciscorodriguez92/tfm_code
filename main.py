@@ -8,7 +8,7 @@ import numpy as np
 
 from sklearn.pipeline import Pipeline, FeatureUnion, make_pipeline
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.model_selection import cross_val_score, GridSearchCV
+from sklearn.model_selection import cross_val_score, GridSearchCV, cross_validate
 from src.preprocess import TextCleaner
 from src.preprocess import ColumnSelector
 from src.preprocess import TypeSelector
@@ -37,7 +37,7 @@ tweets_labeled['hastag_presence'] = np.where(tweets_labeled['hashtags'].isnull()
 tweets_labeled['url_presence'] = np.where(tweets_labeled['urls_url'].isnull(), 'no', 'si') 
 tweets_labeled['mentions_presence'] = np.where(tweets_labeled['mentions_user_id'].isnull(), 'no', 'si') 
 
-#tweets_labeled = tweets_labeled.loc[1:20,:]
+#tweets_labeled = tweets_labeled.loc[80:100,:]
 
 #texto_prueba = tweets_labeled.loc[:, ['text', 'categoria']].fillna('MACHISTA')
 #texto_prueba = tweets_labeled.loc[1240:1250, x_cols2]
@@ -120,10 +120,16 @@ classifier_pipeline.fit(tweets_labeled[x_cols2], tweets_labeled['categoria'])
 
 
 #%%
+scoring = {'acc': 'accuracy',
+           'precision': 'precision_macro',
+           'recall': 'recall_macro',
+           'f1': 'f1_macro'
+           }
+
 #import time
 #start = time.time()
-
-#print(cross_val_score(classifier_pipeline, tweets_labeled[x_cols2], tweets_labeled['categoria'], cv = 10, n_jobs = -1))
+print(cross_validate(classifier_pipeline, tweets_labeled[x_cols2], tweets_labeled['categoria'], cv = 10, n_jobs = -1, scoring=scoring))
+print(cross_val_score(classifier_pipeline, tweets_labeled[x_cols2], tweets_labeled['categoria'], cv = 10, n_jobs = -1))
 #predicted = classifier_pipeline.predict(texto_prueba.drop('categoria', axis=1))
 #print np.mean(predicted == texto_prueba['categoria']) 
 
@@ -133,7 +139,6 @@ classifier_pipeline.fit(tweets_labeled[x_cols2], tweets_labeled['categoria'])
 #%%
 
 # para chequear los parámetros:: classifier_pipeline.get_params().keys()
-
 
 import time
 start = time.time()

@@ -23,10 +23,9 @@ tweets_fields = pd.read_csv(path + '/resources/data/corpus_machismo_frodriguez_a
                             dtype={'status_id': 'str'})
 #%% Cruce de los ficheros
 x_cols2 = ['text','source', 'display_text_width', 'respuesta', 'respuesta_screen_name',
-          'is_quote', 'is_retweet', 'favorite_count', 'retweet_count', 'hastag_presence',
-          'url_presence', 'media_type', 'mentions_presence', 'retweet_favorite_count',
-          'retweet_retweet_count', 'retweet_followers_count', 'retweet_verified',
-          'protected', 'followers_count', 'friends_count', 'listed_count', 'statuses_count',
+          'favorite_count', 'retweet_count', 'hastag_presence',
+          'url_presence', 'media_type', 'mentions_presence',
+          'followers_count', 'friends_count', 'listed_count', 'statuses_count',
           'favourites_count', 'verified', 'categoria']
 tweets_fields = utils.change_dtypes(tweets_fields, {'status_id': str})
 labels = utils.change_dtypes(labels, {'status_id': str})
@@ -47,8 +46,8 @@ tweets_labeled['mentions_presence'] = np.where(tweets_labeled['mentions_user_id'
 #        lambda row: utils.remove_punctuation(utils.remove_accents(row.decode('utf-8'))))
 #%% 
 categorical_features = ['source', 'respuesta', 'respuesta_screen_name',
-          'is_quote', 'is_retweet', 'hastag_presence', 'url_presence',
-          'media_type', 'mentions_presence', 'protected', 'verified']
+          'hastag_presence', 'url_presence',
+          'media_type', 'mentions_presence', 'verified']
 for f in categorical_features:
     tweets_labeled[f] = tweets_labeled[f].astype("category")
 
@@ -76,10 +75,9 @@ for f in categorical_features:
 
 #%% 
 x_cols = ['source', 'display_text_width', 'respuesta', 'respuesta_screen_name',
-          'is_quote', 'is_retweet', 'favorite_count', 'retweet_count', 'hastag_presence',
-          'url_presence', 'media_type', 'mentions_presence', 'retweet_favorite_count',
-          'retweet_retweet_count', 'retweet_followers_count', 'retweet_verified',
-          'protected', 'followers_count', 'friends_count', 'listed_count', 'statuses_count',
+          'favorite_count', 'retweet_count', 'hastag_presence',
+          'url_presence', 'media_type', 'mentions_presence',
+          'followers_count', 'friends_count', 'listed_count', 'statuses_count',
           'favourites_count', 'verified']
 
 preprocess_pipeline = make_pipeline(
@@ -113,7 +111,7 @@ text_pipeline = Pipeline([
 classifier_pipeline = Pipeline([('feature-union', FeatureUnion([('text-features', text_pipeline), 
                                ('other-features', preprocess_pipeline)
                               ])),
-                          ('clf', clf.get_classifier())
+                          ('clf', clf.get_classifier('svm'))
                           ])
     
 classifier_pipeline.fit(tweets_labeled[x_cols2], tweets_labeled['categoria'])
@@ -128,8 +126,10 @@ scoring = {'acc': 'accuracy',
 
 #import time
 #start = time.time()
-print(cross_validate(classifier_pipeline, tweets_labeled[x_cols2], tweets_labeled['categoria'], cv = 10, n_jobs = -1, scoring=scoring))
-print(cross_val_score(classifier_pipeline, tweets_labeled[x_cols2], tweets_labeled['categoria'], cv = 10, n_jobs = -1))
+
+#print(cross_validate(classifier_pipeline, tweets_labeled[x_cols2], tweets_labeled['categoria'], cv = 10, n_jobs = -1, scoring=scoring))
+#print(cross_val_score(classifier_pipeline, tweets_labeled[x_cols2], tweets_labeled['categoria'], cv = 10, n_jobs = -1))
+
 #predicted = classifier_pipeline.predict(texto_prueba.drop('categoria', axis=1))
 #print np.mean(predicted == texto_prueba['categoria']) 
 
@@ -142,7 +142,7 @@ print(cross_val_score(classifier_pipeline, tweets_labeled[x_cols2], tweets_label
 
 import time
 start = time.time()
-parameters = utils.get_grid_parameters()
+parameters = utils.get_grid_parameters('svm')
 
 model = GridSearchCV(classifier_pipeline, param_grid=parameters, cv=5,
                          scoring='accuracy', verbose=1, n_jobs = -1)

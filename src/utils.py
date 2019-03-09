@@ -111,11 +111,11 @@ def get_grid_parameters(method='logistic_regression'):
 
     if 'random_forest' == method:
         return {
-    'feature-union__text-features__tfidf__use_idf': (True, False),
+#    'feature-union__text-features__tfidf__use_idf': (True, False),
 #    'feature-union__text-features__tfidf__smooth_idf': (True, False),
-    'feature-union__text-features__tfidf__sublinear_tf': (True, False),
+#    'feature-union__text-features__tfidf__sublinear_tf': (True, False),
 #    'feature-union__text-features__tfidf__norm': ['l2', None],
-    'feature-union__text-features__tfidf__min_df': [0.0, 0.001, 0.01, 1],
+    'feature-union__text-features__tfidf__min_df': [0.0, 0.01, 1],
     'clf__class_weight': [None, 'balanced'],
     "clf__n_estimators": [250, 450],
     'clf__bootstrap': (True, False),
@@ -124,14 +124,15 @@ def get_grid_parameters(method='logistic_regression'):
 }           
     if 'svm' == method:
         return {
-    'feature-union__text-features__tfidf__use_idf': (True, False),
+#    'feature-union__text-features__tfidf__use_idf': (True, False),
 #    'feature-union__text-features__tfidf__smooth_idf': (True, False),
-    'feature-union__text-features__tfidf__sublinear_tf': (True, False),
+#    'feature-union__text-features__tfidf__sublinear_tf': (True, False),
 #    'feature-union__text-features__tfidf__norm': ['l2', None],
-    'feature-union__text-features__tfidf__min_df': [0.0, 0.001, 0.01, 1],
+    'feature-union__text-features__tfidf__min_df': [0.01, 1],
     'clf__class_weight': [None, 'balanced'],
-    "clf__gamma": [0.001, 0.1, 0.3, 0.6, 'auto'],
-    'clf__kernel': ['linear', 'rbf'],
-    'clf__C': [1, 10, 100, 1000, 10000]
+    "clf__gamma": [0.001, 0.1, 0.6, 'auto'],
+    'clf__kernel': ['rbf'],
+#    'clf__kernel': ['linear', 'rbf'],
+    'clf__C': [1, 10, 100, 10000]
 
 }    

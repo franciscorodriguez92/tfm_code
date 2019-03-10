@@ -52,7 +52,7 @@ x_cols = ['source', 'display_text_width', 'respuesta', 'respuesta_screen_name',
           'url_presence', 'media_type', 'mentions_presence',
           'followers_count', 'friends_count', 'listed_count', 'statuses_count',
           'favourites_count', 'verified']
-
+classifier = 'logistic_regression'
 preprocess_pipeline = make_pipeline(
     ColumnSelector(columns=x_cols),
     FeatureUnion(transformer_list=[
@@ -84,7 +84,7 @@ text_pipeline = Pipeline([
 classifier_pipeline = Pipeline([('feature-union', FeatureUnion([('text-features', text_pipeline), 
                                ('other-features', preprocess_pipeline)
                               ])),
-                          ('clf', clf.get_classifier('svm'))
+                          ('clf', clf.get_classifier(classifier))
                           ])
     
 #classifier_pipeline.fit(tweets_labeled[x_cols2], tweets_labeled['categoria'])
@@ -118,7 +118,7 @@ print(pd.DataFrame(confusion_matrix(tweets_labeled['categoria'], y_pred, labels=
 
 import time
 start = time.time()
-parameters = utils.get_grid_parameters('svm')
+parameters = utils.get_grid_parameters(classifier)
 
 model = GridSearchCV(classifier_pipeline, param_grid=parameters, cv=5,
                          scoring='accuracy', verbose=1, n_jobs = -1)

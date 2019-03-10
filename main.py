@@ -38,39 +38,13 @@ tweets_labeled['mentions_presence'] = np.where(tweets_labeled['mentions_user_id'
 
 #tweets_labeled = tweets_labeled.loc[80:100,:]
 
-#texto_prueba = tweets_labeled.loc[:, ['text', 'categoria']].fillna('MACHISTA')
-#texto_prueba = tweets_labeled.loc[1240:1250, x_cols2]
-#texto_prueba['text'].str.decode("utf-8")
 
-#texto_prueba['text_processed'] = texto_prueba['text'].apply(
-#        lambda row: utils.remove_punctuation(utils.remove_accents(row.decode('utf-8'))))
 #%% 
 categorical_features = ['source', 'respuesta', 'respuesta_screen_name',
           'hastag_presence', 'url_presence',
           'media_type', 'mentions_presence', 'verified']
 for f in categorical_features:
     tweets_labeled[f] = tweets_labeled[f].astype("category")
-
-#%% Campos
-
-# Campos:  text, source, display_text_width, reply_to_status_id != null?
-# reply_to_screen_name != 0, is_quote (es citado), is_retweet, favorite_count, retweet_count,
-
-#campos que faltan por poner:::::::::
-# hastags != 0, 
-#urls_url !=0, media_type,
-# mentions_user_id != 0,
-# , quoted_favorite_count, quoted_retweet_count, quoted_followers_count, quoted_friends_count
-#quoted_statuses_count, retweet_source, 
-#retweet_favorite_count, retweet_retweet_count
-# retweet_followers_count, retweet_friends_count,retweet_statuses_count, retweet_verified
-#protected
-#followers_count
-#friends_count
-#listed_count
-#statuses_count
-#favourites_count
-#verified
 
 
 #%% 
@@ -127,8 +101,8 @@ scoring = {'acc': 'accuracy',
 #import time
 #start = time.time()
 
-#print(cross_validate(classifier_pipeline, tweets_labeled[x_cols2], tweets_labeled['categoria'], cv = 10, n_jobs = -1, scoring=scoring))
-#print(cross_val_score(classifier_pipeline, tweets_labeled[x_cols2], tweets_labeled['categoria'], cv = 10, n_jobs = -1))
+print(cross_validate(classifier_pipeline, tweets_labeled[x_cols2], tweets_labeled['categoria'], cv = 10, n_jobs = -1, scoring=scoring))
+print(cross_val_score(classifier_pipeline, tweets_labeled[x_cols2], tweets_labeled['categoria'], cv = 10, n_jobs = -1))
 
 #predicted = classifier_pipeline.predict(texto_prueba.drop('categoria', axis=1))
 #print np.mean(predicted == texto_prueba['categoria']) 

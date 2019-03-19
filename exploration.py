@@ -39,44 +39,40 @@ tweets_labeled = tweets_labeled[x_cols2]
 tweets_labeled.describe()
 
 #%% Distribucion de la clase
-#sns.palplot(sns.color_palette("ch:2.5,-.2,dark=.3"))
-#sns.set(style="darkgrid")
+sns.set(style="darkgrid")
 ax = sns.countplot(x="categoria", data=tweets_labeled, palette="BuGn_r")
-#%%
+#%% Tabla de frecuencia de la clase
 pd.value_counts(tweets_labeled["categoria"]).to_frame().reset_index()
 
-#%%
+#%% Histograma variables numericas
 selector = TypeSelector(np.number)
 tweets_labeled_number = selector.fit_transform(tweets_labeled)
 tweets_labeled_number["categoria"] = tweets_labeled["categoria"].values
+tweets_labeled_number.hist(bins=30, figsize=(15, 6), layout=(2, 4));
 
-#%%
-tweets_labeled_number.hist(bins=15, figsize=(15, 6), layout=(2, 4));
-
-#%%
-sns.pairplot(tweets_labeled_number, hue = "categoria", vars = ["display_text_width", "retweet_count"])
-#%%
+#%% Pairplot para variables numericas
 sns.pairplot(tweets_labeled_number.fillna(0), hue = "categoria")
-
-#%%
-
+#%% Pairplot para dos variables que pueden ser relavantes: "display_text_width", "retweet_count"
+sns.pairplot(tweets_labeled_number, hue = "categoria", vars = ["display_text_width", "retweet_count"])
+#%% Distribucion clase para variables categoricas
 categorical_features = ['respuesta', 'respuesta_screen_name',
           'hastag_presence', 'url_presence',
-          'media_type', 'mentions_presence', 'verified']
+          'media_type', 'mentions_presence', 'verified', 'source']
+tweets_labeled['source'] = tweets_labeled['source'].str.decode('utf-8').astype("category")
+
 for f in categorical_features:
     tweets_labeled[f] = tweets_labeled[f].astype("category")
 tweets_labeled_categorical = tweets_labeled[categorical_features]
 tweets_labeled_categorical["categoria"] = tweets_labeled["categoria"].values
+frequencies = tweets_labeled_categorical['source'].value_counts()
 
-#%%
+condition = frequencies<100   # you can define it however you want
+mask_obs = frequencies[condition].index
+mask_dict = dict.fromkeys(mask_obs, 'others')
+
+tweets_labeled_categorical['source'] = tweets_labeled_categorical['source'].replace(mask_dict)
 fig, ax = plt.subplots(2, 4, figsize=(20, 10))
 for variable, subplot in zip(categorical_features, ax.flatten()):
-    sns.countplot(tweets_labeled_categorical[variable], ax=subplot)
+    sns.countplot(data = tweets_labeled_categorical, x = variable, hue = 'categoria', ax=subplot)
     for label in subplot.get_xticklabels():
         label.set_rotation(90)
-        
-#%%
-tweets_labeled['source'] = tweets_labeled['source'].str.decode('utf-8').astype("category")
-sns.countplot(tweets_labeled['source'])
-#%%
-pd.value_counts(tweets_labeled["source"]).to_frame().reset_index()

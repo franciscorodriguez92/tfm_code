@@ -18,7 +18,7 @@ from sklearn.metrics import confusion_matrix
 
 #%% Read files
 path = os.getcwd()
-labels = pd.read_table(path + '/resources/data/corpus_machismo_etiquetas_fran.csv', sep=";")
+labels = pd.read_table(path + '/resources/data/corpus_machismo_etiquetas.csv', sep=";")
 labels = labels[["status_id","categoria"]]
 tweets_fields = pd.read_csv(path + '/resources/data/corpus_machismo_frodriguez_atributos_extra.csv', 
                             dtype={'status_id': 'str'})
@@ -78,7 +78,7 @@ text_pipeline = Pipeline([
     ('column_selection', ColumnSelector('text')),
     ('tfidf', TfidfVectorizer(tokenizer=utils.tokenizer_, 
                                           smooth_idf=True, preprocessor = preprocessor,
-                                          norm=None))
+                                          norm=None, ngram_range=(1,1)))
 ])  
     
 classifier_pipeline = Pipeline([('feature-union', FeatureUnion([('text-features', text_pipeline), 

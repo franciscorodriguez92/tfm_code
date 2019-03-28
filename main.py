@@ -86,12 +86,20 @@ classifier_pipeline = Pipeline([('feature-union', FeatureUnion([('text-features'
                               ])),
                           ('clf', clf.get_classifier(classifier))
                           ])
-    
+
 #classifier_pipeline.fit(tweets_labeled[x_cols2], tweets_labeled['categoria'])
 
+#%% Pipeline para baseline    
+baseline_pipeline = Pipeline([('text_pipeline', text_pipeline),
+                          ('clf', clf.get_classifier(classifier))
+                          ])
+    
+#%% Cross validation baseline
+print(cross_val_score(baseline_pipeline, tweets_labeled[x_cols2], tweets_labeled['categoria'], cv = 10, n_jobs = 1))
 
 #%% Cross validation
 print(cross_val_score(classifier_pipeline, tweets_labeled[x_cols2], tweets_labeled['categoria'], cv = 10, n_jobs = 1))
+
 
 
 #%% métricas de calidad: accuracy, precision, recall, f1

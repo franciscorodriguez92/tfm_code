@@ -37,7 +37,7 @@ tweets_labeled['hastag_presence'] = np.where(tweets_labeled['hashtags'].isnull()
 tweets_labeled['url_presence'] = np.where(tweets_labeled['urls_url'].isnull(), 'no', 'si') 
 tweets_labeled['mentions_presence'] = np.where(tweets_labeled['mentions_user_id'].isnull(), 'no', 'si') 
 
-#tweets_labeled = tweets_labeled.loc[80:100,:]
+tweets_labeled = tweets_labeled.loc[80:100,:]
 
 #%% 
 categorical_features = ['source', 'respuesta', 'respuesta_screen_name',
@@ -141,3 +141,38 @@ for param_name in sorted(parameters.keys()):
 end = time.time()
 print(end - start)
 
+#%% Método de evaluación: 
+#1. Hacer 10 repartos diferentes y aleatorios de training y test (70/30) -> ShuffleSplit
+#2. Para cada reparto, 
+#	2.1 hacer GridSearchCV con el  70%, coger parámetros óptimos
+#	2.2 hacer un cross_validate (k=10) con el 30% restante y los parámetros óptimos
+#
+#Problema: Los parámetros pueden cambiar en cada caso!?
+scoring = {'acc': 'accuracy',
+           'precision': 'precision_macro',
+           'recall': 'recall_macro',
+           'f1': 'f1_macro'
+           }
+
+parameters = utils.get_grid_parameters(classifier)
+model = GridSearchCV(classifier_pipeline, param_grid=parameters, cv=2,
+                         scoring='accuracy', verbose=1, n_jobs = 1)
+from sklearn.model_selection import ShuffleSplit
+
+scores = []
+train_test_split = ShuffleSplit(n_splits=10, test_size=.30, random_state=0)
+for train, test in train_test_split.split(tweets_labeled):
+    train = tweets_labeled.iloc[train]
+    test = tweets_labeled.iloc[test]
+    model.fit(train[x_cols2], train['categoria'])
+    test_score = dict(cross_validate(model.best_estimator_, test[x_cols2], test['categoria'], cv = 2, n_jobs = 1, scoring=scoring))
+    scores.append(test_score)
+    print(test_score)
+
+#    print("Best score: %0.3f" % model.best_score_)
+#    print("Best parameters set:")
+#    print(model.best_estimator_)
+#    best_parameters = model.best_estimator_.get_params()
+    #for param_name in sorted(parameters.keys()):
+        #print("\t%s: %r" % (param_name, best_parameters[param_name]))
+    #print train.shape, test.shape    

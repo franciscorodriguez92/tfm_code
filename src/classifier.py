@@ -9,7 +9,7 @@ from sklearn.svm import SVC
 
 
 def get_classifier(method='logistic_regression'):
-    if 'logistic_regression' == method:
+    if 'logistic_regression' or 'baseline' == method:
         return LogisticRegression(C=1e3,
                                   tol=0.01,
                                   multi_class='ovr',

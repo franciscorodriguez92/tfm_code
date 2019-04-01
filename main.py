@@ -37,7 +37,7 @@ tweets_labeled['hastag_presence'] = np.where(tweets_labeled['hashtags'].isnull()
 tweets_labeled['url_presence'] = np.where(tweets_labeled['urls_url'].isnull(), 'no', 'si') 
 tweets_labeled['mentions_presence'] = np.where(tweets_labeled['mentions_user_id'].isnull(), 'no', 'si') 
 
-tweets_labeled = tweets_labeled.loc[80:100,:]
+#tweets_labeled = tweets_labeled.loc[80:100,:]
 
 #%% 
 categorical_features = ['source', 'respuesta', 'respuesta_screen_name',
@@ -78,7 +78,7 @@ text_pipeline = Pipeline([
     ('column_selection', ColumnSelector('text')),
     ('tfidf', TfidfVectorizer(tokenizer=utils.tokenizer_, 
                                           smooth_idf=True, preprocessor = preprocessor,
-                                          norm=None, ngram_range=(1,1)))
+                                          norm=None, min_df=0.01, ngram_range=(1,1)))
 ])  
     
 classifier_pipeline = Pipeline([('feature-union', FeatureUnion([('text-features', text_pipeline), 
@@ -95,52 +95,62 @@ baseline_pipeline = Pipeline([('text_pipeline', text_pipeline),
                           ])
     
 #%% Cross validation baseline
-print(cross_val_score(baseline_pipeline, tweets_labeled[x_cols2], tweets_labeled['categoria'], cv = 10, n_jobs = 1))
-
+# =============================================================================
+# print(cross_val_score(baseline_pipeline, tweets_labeled[x_cols2], tweets_labeled['categoria'], cv = 10, n_jobs = 1))
+# 
+# =============================================================================
 #%% Cross validation
-print(cross_val_score(classifier_pipeline, tweets_labeled[x_cols2], tweets_labeled['categoria'], cv = 10, n_jobs = 1))
-
+# =============================================================================
+# print(cross_val_score(classifier_pipeline, tweets_labeled[x_cols2], tweets_labeled['categoria'], cv = 10, n_jobs = 1))
+# 
+# =============================================================================
 
 
 #%% métricas de calidad: accuracy, precision, recall, f1
-scoring = {'acc': 'accuracy',
-           'precision': 'precision_macro',
-           'recall': 'recall_macro',
-           'f1': 'f1_macro'
-           }
-print(cross_validate(classifier_pipeline, tweets_labeled[x_cols2], tweets_labeled['categoria'], cv = 10, n_jobs = -1, scoring=scoring))
+# =============================================================================
+# scoring = {'acc': 'accuracy',
+#            'precision': 'precision_macro',
+#            'recall': 'recall_macro',
+#            'f1': 'f1_macro'
+#            }
+# print(cross_validate(classifier_pipeline, tweets_labeled[x_cols2], tweets_labeled['categoria'], cv = 10, n_jobs = -1, scoring=scoring))
+# =============================================================================
 
 #%% Matriz de confusión
 #predicted = classifier_pipeline.predict(texto_prueba.drop('categoria', axis=1))
 #print np.mean(predicted == texto_prueba['categoria']) 
 
-y_pred = cross_val_predict(classifier_pipeline, tweets_labeled[x_cols2], tweets_labeled['categoria'], cv=10)
-unique_label = np.unique(tweets_labeled['categoria'])
-print(pd.DataFrame(confusion_matrix(tweets_labeled['categoria'], y_pred, labels=unique_label), 
-                   index=['true:{:}'.format(x) for x in unique_label], 
-                   columns=['pred:{:}'.format(x) for x in unique_label]))
+# =============================================================================
+# y_pred = cross_val_predict(classifier_pipeline, tweets_labeled[x_cols2], tweets_labeled['categoria'], cv=10)
+# unique_label = np.unique(tweets_labeled['categoria'])
+# print(pd.DataFrame(confusion_matrix(tweets_labeled['categoria'], y_pred, labels=unique_label), 
+#                    index=['true:{:}'.format(x) for x in unique_label], 
+#                    columns=['pred:{:}'.format(x) for x in unique_label]))
+# =============================================================================
 
 #%% GridSearchCV
 
 # para chequear los parámetros:: classifier_pipeline.get_params().keys()
 
-import time
-start = time.time()
-parameters = utils.get_grid_parameters(classifier)
-
-model = GridSearchCV(classifier_pipeline, param_grid=parameters, cv=5,
-                         scoring='accuracy', verbose=1, n_jobs = -1)
-
-model.fit(tweets_labeled[x_cols2], tweets_labeled['categoria'])
-print("Best score: %0.3f" % model.best_score_)
-print("Best parameters set:")
-best_parameters = model.best_estimator_.get_params()
-for param_name in sorted(parameters.keys()):
-    print("\t%s: %r" % (param_name, best_parameters[param_name]))
-
-end = time.time()
-print(end - start)
-
+# =============================================================================
+# import time
+# start = time.time()
+# parameters = utils.get_grid_parameters(classifier)
+# 
+# model = GridSearchCV(classifier_pipeline, param_grid=parameters, cv=5,
+#                          scoring='accuracy', verbose=1, n_jobs = -1)
+# 
+# model.fit(tweets_labeled[x_cols2], tweets_labeled['categoria'])
+# print("Best score: %0.3f" % model.best_score_)
+# print("Best parameters set:")
+# best_parameters = model.best_estimator_.get_params()
+# for param_name in sorted(parameters.keys()):
+#     print("\t%s: %r" % (param_name, best_parameters[param_name]))
+# 
+# end = time.time()
+# print(end - start)
+# 
+# =============================================================================
 #%% Método de evaluación: 
 #1. Hacer 10 repartos diferentes y aleatorios de training y test (70/30) -> ShuffleSplit
 #2. Para cada reparto, 
@@ -148,6 +158,8 @@ print(end - start)
 #	2.2 hacer un cross_validate (k=10) con el 30% restante y los parámetros óptimos
 #
 #Problema: Los parámetros pueden cambiar en cada caso!?
+import time
+start = time.time()
 scoring = {'acc': 'accuracy',
            'precision': 'precision_macro',
            'recall': 'recall_macro',
@@ -155,8 +167,8 @@ scoring = {'acc': 'accuracy',
            }
 
 parameters = utils.get_grid_parameters(classifier)
-model = GridSearchCV(classifier_pipeline, param_grid=parameters, cv=2,
-                         scoring='accuracy', verbose=1, n_jobs = 1)
+model = GridSearchCV(classifier_pipeline, param_grid=parameters, cv=5,
+                         scoring='accuracy', verbose=1, n_jobs = -1)
 from sklearn.model_selection import ShuffleSplit
 
 scores_fold = []
@@ -165,7 +177,7 @@ for train, test in train_test_split.split(tweets_labeled):
     train = tweets_labeled.iloc[train]
     test = tweets_labeled.iloc[test]
     model.fit(train[x_cols2], train['categoria'])
-    test_score = dict(cross_validate(model.best_estimator_, test[x_cols2], test['categoria'], cv = 2, n_jobs = 1, scoring=scoring))
+    test_score = dict(cross_validate(model.best_estimator_, test[x_cols2], test['categoria'], cv = 10, n_jobs = -1, scoring=scoring))
     scores_fold.append(test_score)
     print(test_score)
 
@@ -177,3 +189,5 @@ for j in keys:
 
 print(scores)    
 
+end = time.time()
+print(end - start)

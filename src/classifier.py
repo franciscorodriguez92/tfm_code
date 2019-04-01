@@ -23,6 +23,6 @@ def get_classifier(method='logistic_regression'):
                                       random_state=123)
 
     if 'svm' == method:
-        return SVC(C=1.0, kernel='linear', degree=3, gamma='auto')
+        return SVC(C=1.0, kernel='rbf', degree=3, gamma='auto')
 
 

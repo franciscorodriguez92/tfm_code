@@ -99,13 +99,13 @@ def tokenizer_(text):
 def get_grid_parameters(method='logistic_regression'):
     if 'logistic_regression' == method:
         return {
-    'feature-union__text-features__tfidf__use_idf': (True, False),
+#    'feature-union__text-features__tfidf__use_idf': (True, False),
 #    'feature-union__text-features__tfidf__smooth_idf': (True, False),
 #    'feature-union__text-features__tfidf__sublinear_tf': (True, False),
 #    'feature-union__text-features__tfidf__norm': ['l2', None],
-    'feature-union__text-features__tfidf__min_df': [0.001, 0.01, 1],
+#    'feature-union__text-features__tfidf__min_df': [0.001, 0.01, 1],
     'clf__C': [1, 10],
-#    'clf__multi_class': ['ovr', 'auto'],
+    'clf__multi_class': ['ovr', 'auto'],
     'clf__class_weight': [None, 'balanced']
 }
 
@@ -115,11 +115,11 @@ def get_grid_parameters(method='logistic_regression'):
 #    'feature-union__text-features__tfidf__smooth_idf': (True, False),
 #    'feature-union__text-features__tfidf__sublinear_tf': (True, False),
 #    'feature-union__text-features__tfidf__norm': ['l2', None],
-    'feature-union__text-features__tfidf__min_df': [0.0, 0.01, 1],
-    'clf__class_weight': [None, 'balanced'],
+#    'feature-union__text-features__tfidf__min_df': [0.0, 0.01, 1],
+#    'clf__class_weight': [None, 'balanced'],
     "clf__n_estimators": [250, 450],
     'clf__bootstrap': (True, False),
-    'clf__max_depth': [None, 8, 30]
+    'clf__max_depth': [None, 30]
 
 }           
     if 'svm' == method:
@@ -128,10 +128,10 @@ def get_grid_parameters(method='logistic_regression'):
 #    'feature-union__text-features__tfidf__smooth_idf': (True, False),
 #    'feature-union__text-features__tfidf__sublinear_tf': (True, False),
 #    'feature-union__text-features__tfidf__norm': ['l2', None],
-    'feature-union__text-features__tfidf__min_df': [0.01, 1],
-    'clf__class_weight': [None, 'balanced'],
+#    'feature-union__text-features__tfidf__min_df': [0.01, 1],
+#    'clf__class_weight': [None, 'balanced'],
     "clf__gamma": [0.001, 0.1, 0.6, 'auto'],
-    'clf__kernel': ['rbf'],
+#    'clf__kernel': ['rbf'],
 #    'clf__kernel': ['linear', 'rbf'],
     'clf__C': [1, 10, 100, 10000]
 

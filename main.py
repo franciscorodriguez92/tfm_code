@@ -184,7 +184,7 @@ for train, test in train_test_split.split(tweets_labeled):
 keys = set([key for i in scores_fold for key,value in i.iteritems()])
 scores = {}
 for j in keys:
-    means = [np.mean(i[j]) for i in scores]
+    means = [np.mean(i[j]) for i in scores_fold]
     scores[j] = np.mean(means)
 
 print(scores)    

@@ -52,7 +52,7 @@ x_cols = ['source', 'display_text_width', 'respuesta', 'respuesta_screen_name',
           'url_presence', 'media_type', 'mentions_presence',
           'followers_count', 'friends_count', 'listed_count', 'statuses_count',
           'favourites_count', 'verified']
-classifier = 'logistic_regression'
+classifier = 'random_forest'
 preprocess_pipeline = make_pipeline(
     ColumnSelector(columns=x_cols),
     FeatureUnion(transformer_list=[

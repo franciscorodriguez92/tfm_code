@@ -42,7 +42,7 @@ tweets_labeled.describe()
 sns.set(style="darkgrid")
 ax = sns.countplot(x="categoria", data=tweets_labeled, palette="BuGn_r")
 #%% Tabla de frecuencia de la clase
-pd.value_counts(tweets_labeled["categoria"]).to_frame().reset_index()
+((pd.value_counts(tweets_labeled["categoria"])/len(tweets_labeled["categoria"]))*100).to_frame().reset_index()
 
 #%% Histograma variables numericas
 selector = TypeSelector(np.number)

@@ -38,7 +38,7 @@ tweets_labeled['url_presence'] = np.where(tweets_labeled['urls_url'].isnull(), '
 tweets_labeled['mentions_presence'] = np.where(tweets_labeled['mentions_user_id'].isnull(), 'no', 'si') 
 
 #tweets_labeled = tweets_labeled.loc[80:100,:]
-
+#tweets_labeled = tweets_labeled.loc[0:100,:]
 #%% 
 categorical_features = ['source', 'respuesta', 'respuesta_screen_name',
           'hastag_presence', 'url_presence',
@@ -52,7 +52,7 @@ x_cols = ['source', 'display_text_width', 'respuesta', 'respuesta_screen_name',
           'url_presence', 'media_type', 'mentions_presence',
           'followers_count', 'friends_count', 'listed_count', 'statuses_count',
           'favourites_count', 'verified']
-classifier = 'random_forest'
+classifier = 'logistic_regression'
 preprocess_pipeline = make_pipeline(
     ColumnSelector(columns=x_cols),
     FeatureUnion(transformer_list=[
@@ -180,6 +180,11 @@ for train, test in train_test_split.split(tweets_labeled):
     test_score = dict(cross_validate(model.best_estimator_, test[x_cols2], test['categoria'], cv = 10, n_jobs = -1, scoring=scoring))
     scores_fold.append(test_score)
     print(test_score)
+    unique_label = np.unique(test['categoria'])
+    y_pred = cross_val_predict(model.best_estimator_, test[x_cols2], test['categoria'], cv=10)
+    print("Matriz de confusion:::::")
+    print(pd.DataFrame(confusion_matrix(test['categoria'], y_pred, labels=unique_label), index=['true:{:}'.format(x) for x in unique_label], columns=['pred:{:}'.format(x) for x in unique_label]))
+
 
 keys = set([key for i in scores_fold for key,value in i.iteritems()])
 scores = {}

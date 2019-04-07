@@ -173,6 +173,7 @@ from sklearn.model_selection import ShuffleSplit
 
 scores_fold = []
 train_test_split = ShuffleSplit(n_splits=10, test_size=.30, random_state=0)
+iter_split = 1
 for train, test in train_test_split.split(tweets_labeled):
     train = tweets_labeled.iloc[train]
     test = tweets_labeled.iloc[test]
@@ -184,6 +185,10 @@ for train, test in train_test_split.split(tweets_labeled):
     y_pred = cross_val_predict(model.best_estimator_, test[x_cols2], test['categoria'], cv=10, n_jobs = -1)
     print("Matriz de confusion:::::")
     print(pd.DataFrame(confusion_matrix(test['categoria'], y_pred, labels=unique_label), index=['true:{:}'.format(x) for x in unique_label], columns=['pred:{:}'.format(x) for x in unique_label]))
+    test = test.assign(y_pred=pd.Series(y_pred).values)
+    file_name = 'test_' + str(iter_split) + '.csv'
+    iter_split += 1
+    test.to_csv(file_name, sep = ';', encoding='utf-8')
 
 
 keys = set([key for i in scores_fold for key,value in i.iteritems()])

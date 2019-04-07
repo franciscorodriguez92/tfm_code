@@ -181,7 +181,7 @@ for train, test in train_test_split.split(tweets_labeled):
     scores_fold.append(test_score)
     print(test_score)
     unique_label = np.unique(test['categoria'])
-    y_pred = cross_val_predict(model.best_estimator_, test[x_cols2], test['categoria'], cv=10)
+    y_pred = cross_val_predict(model.best_estimator_, test[x_cols2], test['categoria'], cv=10, n_jobs = -1)
     print("Matriz de confusion:::::")
     print(pd.DataFrame(confusion_matrix(test['categoria'], y_pred, labels=unique_label), index=['true:{:}'.format(x) for x in unique_label], columns=['pred:{:}'.format(x) for x in unique_label]))
 

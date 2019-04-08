@@ -9,6 +9,7 @@ import emoji
 import os
 from nltk.tokenize import TweetTokenizer
 import unidecode
+from nltk.stem import SnowballStemmer
 
 
 def to_lower_endline(text):
@@ -51,7 +52,8 @@ def filter_stopwords(word_list):
     return filtered_words
 
 def stemming(word_list):
-    filtered_words_stem=[PorterStemmer().stem(word) for word in word_list]
+    #filtered_words_stem=[PorterStemmer().stem(word) for word in word_list]
+    filtered_words_stem=[SnowballStemmer('spanish').stem(word) for word in word_list]
     return filtered_words_stem
 
 def replace_abb(tokens):

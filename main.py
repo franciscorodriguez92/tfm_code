@@ -168,11 +168,11 @@ scoring = {'acc': 'accuracy',
 
 parameters = utils.get_grid_parameters(classifier)
 model = GridSearchCV(classifier_pipeline, param_grid=parameters, cv=5,
-                         scoring='accuracy', verbose=1, n_jobs = -1)
+                         scoring='f1_macro', verbose=1, n_jobs = -1)
 from sklearn.model_selection import ShuffleSplit
 
 scores_fold = []
-train_test_split = ShuffleSplit(n_splits=10, test_size=.30, random_state=0)
+train_test_split = ShuffleSplit(n_splits=10, test_size=.70, random_state=0)
 iter_split = 1
 for train, test in train_test_split.split(tweets_labeled):
     train = tweets_labeled.iloc[train]

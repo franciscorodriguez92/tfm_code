@@ -52,8 +52,8 @@ def filter_stopwords(word_list):
     return filtered_words
 
 def stemming(word_list):
-    #filtered_words_stem=[PorterStemmer().stem(word) for word in word_list]
-    filtered_words_stem=[SnowballStemmer('spanish').stem(word) for word in word_list]
+    filtered_words_stem=[PorterStemmer().stem(word) for word in word_list]
+    #filtered_words_stem=[SnowballStemmer('spanish').stem(word) for word in word_list]
     return filtered_words_stem
 
 def replace_abb(tokens):
@@ -118,7 +118,7 @@ def get_grid_parameters(method='logistic_regression'):
 #    'feature-union__text-features__tfidf__sublinear_tf': (True, False),
 #    'feature-union__text-features__tfidf__norm': ['l2', None],
 #    'feature-union__text-features__tfidf__min_df': [0.0, 0.01, 1],
-#    'clf__class_weight': [None, 'balanced'],
+    'clf__class_weight': [None, 'balanced'],
     "clf__n_estimators": [250, 450],
     'clf__bootstrap': (True, False),
     'clf__max_depth': [None, 30]
@@ -131,7 +131,7 @@ def get_grid_parameters(method='logistic_regression'):
 #    'feature-union__text-features__tfidf__sublinear_tf': (True, False),
 #    'feature-union__text-features__tfidf__norm': ['l2', None],
 #    'feature-union__text-features__tfidf__min_df': [0.01, 1],
-#    'clf__class_weight': [None, 'balanced'],
+    'clf__class_weight': [None, 'balanced'],
     "clf__gamma": [0.001, 0.1, 0.6, 'auto'],
 #    'clf__kernel': ['rbf'],
 #    'clf__kernel': ['linear', 'rbf'],

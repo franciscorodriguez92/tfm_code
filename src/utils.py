@@ -10,6 +10,7 @@ import os
 from nltk.tokenize import TweetTokenizer
 import unidecode
 from nltk.stem import SnowballStemmer
+from sklearn.utils import resample
 
 
 def to_lower_endline(text):
@@ -97,6 +98,17 @@ def tokenizer_(text):
 #    hurtlex = set(hurtlex_conservative + hurtlex_inclusive)
 #    return(list(set(tokens) & set(hurtlex)))
 
+
+def downsample(df):
+    df_majority = df[df.categoria=='NO_MACHISTA']
+    df_minority = df[df.categoria!='NO_MACHISTA']
+    df_majority_downsampled = resample(df_majority, 
+                                 replace=False,
+                                 n_samples=len(df_minority),
+                                 random_state=123)
+    df_downsampled = pd.concat([df_majority_downsampled, df_minority])
+    return(df_downsampled)
+    
 
 def get_grid_parameters(method='logistic_regression'):
     if 'logistic_regression' == method:

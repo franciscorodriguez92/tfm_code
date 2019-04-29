@@ -105,17 +105,6 @@ baseline_pipeline = Pipeline([('text_pipeline', text_pipeline),
 # 
 # =============================================================================
 
-
-#%% métricas de calidad: accuracy, precision, recall, f1
-# =============================================================================
-# scoring = {'acc': 'accuracy',
-#            'precision': 'precision_macro',
-#            'recall': 'recall_macro',
-#            'f1': 'f1_macro'
-#            }
-# print(cross_validate(classifier_pipeline, tweets_labeled[x_cols2], tweets_labeled['categoria'], cv = 10, n_jobs = -1, scoring=scoring))
-# =============================================================================
-
 #%% Matriz de confusión
 #predicted = classifier_pipeline.predict(texto_prueba.drop('categoria', axis=1))
 #print np.mean(predicted == texto_prueba['categoria']) 
@@ -151,6 +140,30 @@ baseline_pipeline = Pipeline([('text_pipeline', text_pipeline),
 # print(end - start)
 # 
 # =============================================================================
+    
+#%% Método de evaluación 2: Cross Validation con parámetros por defecto
+import time
+start = time.time()
+scoring = {'acc': 'accuracy',
+           'precision': 'precision_macro',
+           'recall': 'recall_macro',
+           'f1': 'f1_macro'
+            }
+
+test_score_cv = cross_validate(classifier_pipeline, tweets_labeled[x_cols2], 
+                               tweets_labeled['categoria'], cv = 10, 
+                               n_jobs = -1, scoring=scoring)
+print('Resultados::::::')
+print(test_score_cv)
+y_pred = cross_val_predict(classifier_pipeline, tweets_labeled[x_cols2], 
+                               tweets_labeled['categoria'], cv=10, n_jobs = -1)
+print("Matriz de confusion:::::")
+unique_label = np.unique(tweets_labeled['categoria'])
+print(pd.DataFrame(confusion_matrix(tweets_labeled['categoria'], y_pred, labels=unique_label), index=['true:{:}'.format(x) for x in unique_label], columns=['pred:{:}'.format(x) for x in unique_label]))
+tweets_labeled = tweets_labeled.assign(y_pred=pd.Series(y_pred).values)
+tweets_labeled.to_csv('corpus_y_pred.csv', sep = ';', encoding='utf-8')
+end = time.time()
+print(end - start)
 #%% Método de evaluación: 
 #1. Hacer 10 repartos diferentes y aleatorios de training y test (70/30) -> ShuffleSplit
 #2. Para cada reparto, 
@@ -159,47 +172,47 @@ baseline_pipeline = Pipeline([('text_pipeline', text_pipeline),
 #
 #Problema: Los parámetros pueden cambiar en cada caso!?
 ########################
-import time
-start = time.time()
-scoring = {'acc': 'accuracy',
-           'precision': 'precision_macro',
-           'recall': 'recall_macro',
-           'f1': 'f1_macro'
-           }
-
-parameters = utils.get_grid_parameters(classifier)
-model = GridSearchCV(classifier_pipeline, param_grid=parameters, cv=5,
-                         scoring='f1_macro', verbose=1, n_jobs = -1)
-from sklearn.model_selection import ShuffleSplit
-
-scores_fold = []
-train_test_split = ShuffleSplit(n_splits=10, test_size=.70, random_state=0)
-iter_split = 1
-for train, test in train_test_split.split(tweets_labeled):
-    train = tweets_labeled.iloc[train]
-    test = tweets_labeled.iloc[test]
-    model.fit(train[x_cols2], train['categoria'])
-    test_score = dict(cross_validate(model.best_estimator_, test[x_cols2], test['categoria'], cv = 10, n_jobs = -1, scoring=scoring))
-    scores_fold.append(test_score)
-    print(test_score)
-    unique_label = np.unique(test['categoria'])
-    y_pred = cross_val_predict(model.best_estimator_, test[x_cols2], test['categoria'], cv=10, n_jobs = -1)
-    print("Matriz de confusion:::::")
-    print(pd.DataFrame(confusion_matrix(test['categoria'], y_pred, labels=unique_label), index=['true:{:}'.format(x) for x in unique_label], columns=['pred:{:}'.format(x) for x in unique_label]))
-    test = test.assign(y_pred=pd.Series(y_pred).values)
-    file_name = 'test_' + str(iter_split) + '.csv'
-    iter_split += 1
-    test.to_csv(file_name, sep = ';', encoding='utf-8')
-
-
-keys = set([key for i in scores_fold for key,value in i.iteritems()])
-scores = {}
-for j in keys:
-    means = [np.mean(i[j]) for i in scores_fold]
-    scores[j] = np.mean(means)
-
-print(scores)    
-
-end = time.time()
-print(end - start)
+#import time
+#start = time.time()
+#scoring = {'acc': 'accuracy',
+#           'precision': 'precision_macro',
+#           'recall': 'recall_macro',
+#           'f1': 'f1_macro'
+#           }
+#
+#parameters = utils.get_grid_parameters(classifier)
+#model = GridSearchCV(classifier_pipeline, param_grid=parameters, cv=5,
+#                         scoring='f1_macro', verbose=1, n_jobs = -1)
+#from sklearn.model_selection import ShuffleSplit
+#
+#scores_fold = []
+#train_test_split = ShuffleSplit(n_splits=10, test_size=.70, random_state=0)
+#iter_split = 1
+#for train, test in train_test_split.split(tweets_labeled):
+#    train = tweets_labeled.iloc[train]
+#    test = tweets_labeled.iloc[test]
+#    model.fit(train[x_cols2], train['categoria'])
+#    test_score = dict(cross_validate(model.best_estimator_, test[x_cols2], test['categoria'], cv = 10, n_jobs = -1, scoring=scoring))
+#    scores_fold.append(test_score)
+#    print(test_score)
+#    unique_label = np.unique(test['categoria'])
+#    y_pred = cross_val_predict(model.best_estimator_, test[x_cols2], test['categoria'], cv=10, n_jobs = -1)
+#    print("Matriz de confusion:::::")
+#    print(pd.DataFrame(confusion_matrix(test['categoria'], y_pred, labels=unique_label), index=['true:{:}'.format(x) for x in unique_label], columns=['pred:{:}'.format(x) for x in unique_label]))
+#    test = test.assign(y_pred=pd.Series(y_pred).values)
+#    file_name = 'test_' + str(iter_split) + '.csv'
+#    iter_split += 1
+#    test.to_csv(file_name, sep = ';', encoding='utf-8')
+#
+#
+#keys = set([key for i in scores_fold for key,value in i.iteritems()])
+#scores = {}
+#for j in keys:
+#    means = [np.mean(i[j]) for i in scores_fold]
+#    scores[j] = np.mean(means)
+#
+#print(scores)    
+#
+#end = time.time()
+#print(end - start)
 #############################

@@ -158,6 +158,7 @@ baseline_pipeline = Pipeline([('text_pipeline', text_pipeline),
 #	2.2 hacer un cross_validate (k=10) con el 30% restante y los parámetros óptimos
 #
 #Problema: Los parámetros pueden cambiar en cada caso!?
+########################
 import time
 start = time.time()
 scoring = {'acc': 'accuracy',
@@ -201,3 +202,4 @@ print(scores)
 
 end = time.time()
 print(end - start)
+#############################

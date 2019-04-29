@@ -136,7 +136,8 @@ def get_grid_parameters(method='logistic_regression'):
 #    'clf__kernel': ['rbf'],
 #    'clf__kernel': ['linear', 'rbf'],
     'clf__C': [1, 10, 100, 10000]
-
+#    'clf__C': [1]
+    
 }
     if 'baseline' == method:
         return {

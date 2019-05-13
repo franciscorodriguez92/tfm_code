@@ -99,12 +99,12 @@ def tokenizer_(text):
 #    return(list(set(tokens) & set(hurtlex)))
 
 
-def downsample(df):
-    df_majority = df[df.categoria=='NO_MACHISTA']
-    df_minority = df[df.categoria!='NO_MACHISTA']
+def downsample(df, clase, n):
+    df_majority = df[df.categoria==clase]
+    df_minority = df[df.categoria!=clase]
     df_majority_downsampled = resample(df_majority, 
                                  replace=False,
-                                 n_samples=len(df_minority),
+                                 n_samples=n,
                                  random_state=123)
     df_downsampled = pd.concat([df_majority_downsampled, df_minority])
     return(df_downsampled)

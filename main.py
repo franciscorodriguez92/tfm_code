@@ -36,7 +36,10 @@ tweets_labeled['respuesta_screen_name'] = np.where(tweets_labeled['reply_to_scre
 tweets_labeled['hastag_presence'] = np.where(tweets_labeled['hashtags'].isnull(), 'no', 'si') 
 tweets_labeled['url_presence'] = np.where(tweets_labeled['urls_url'].isnull(), 'no', 'si') 
 tweets_labeled['mentions_presence'] = np.where(tweets_labeled['mentions_user_id'].isnull(), 'no', 'si') 
-tweets_labeled = utils.downsample(tweets_labeled)
+dudosos_dict = {"DUDOSO": "MACHISTA"}
+#tweets_labeled = tweets_labeled.replace({"categoria" :dudosos_dict})
+#tweets_labeled = utils.downsample(tweets_labeled, 'NO_MACHISTA', 267)
+#tweets_labeled = utils.downsample(tweets_labeled, 'MACHISTA', 267)
 #tweets_labeled = tweets_labeled.loc[80:100,:]
 #tweets_labeled = tweets_labeled.loc[0:100,:]
 #%% 

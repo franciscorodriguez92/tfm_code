@@ -15,7 +15,7 @@ from src.preprocess import TypeSelector
 
 #%% Read files
 path = os.getcwd()
-labels = pd.read_table(path + '/resources/data/corpus_machismo_etiquetas_fran.csv', sep=";")
+labels = pd.read_table(path + '/resources/data/corpus_machismo_etiquetas.csv', sep=";")
 labels = labels[["status_id","categoria"]]
 tweets_fields = pd.read_csv(path + '/resources/data/corpus_machismo_frodriguez_atributos_extra.csv', 
                             dtype={'status_id': 'str'})

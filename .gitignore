@@ -37,3 +37,4 @@ spyder_crash.log
 
 # .csv files
 *.csv
+.ipynb_checkpoints

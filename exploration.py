@@ -41,6 +41,10 @@ tweets_labeled.describe()
 #%% Distribucion de la clase
 sns.set(style="darkgrid")
 ax = sns.countplot(x="categoria", data=tweets_labeled, palette="BuGn_r")
+#%% Distribucion de la clase
+sns.set(style="darkgrid")
+palette ={"MACHISTA":"crimson","NO_MACHISTA":"lime","DUDOSO":"blue"}
+ax = sns.countplot(x="categoria", data=tweets_labeled, palette=palette)
 #%% Tabla de frecuencia de la clase
 ((pd.value_counts(tweets_labeled["categoria"])/len(tweets_labeled["categoria"]))*100).to_frame().reset_index()
 
